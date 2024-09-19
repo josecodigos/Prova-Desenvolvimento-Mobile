@@ -14,12 +14,12 @@ class DespesasController {
   }
 
   double get totalGastosDiarios {
-    DateTime hoje = DateTime.now();
+    DateTime agora = DateTime.now();
     return _despesas
         .where((despesa) =>
-            despesa.data.day == hoje.day &&
-            despesa.data.month == hoje.month &&
-            despesa.data.year == hoje.year)
+            despesa.data.day == agora.day &&
+            despesa.data.month == agora.month &&
+            despesa.data.year == agora.year)
         .fold(0, (sum, item) => sum + item.valor);
   }
 
