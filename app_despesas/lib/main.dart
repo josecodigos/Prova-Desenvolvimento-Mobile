@@ -6,7 +6,7 @@ import 'despesa.dart';
 void main() {
   runApp(MyApp());
 }
-
+//Fiz esse esqueminha pra controlar melhor as cores do app
 Color primaryColor = Colors.blue;
 Color secondaryColor = Colors.white70;
 Color backgroundColor = Colors.grey.shade100;
@@ -37,15 +37,15 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final DespesasController despesasController = DespesasController();
+class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen state
+  final DespesasController despesasController = DespesasController(); //construtor para a classe despesaController
 
-  final TextEditingController _descricaoController = TextEditingController();
-  final TextEditingController _valorController = TextEditingController();
+  final TextEditingController _descricaoController = TextEditingController(); //um controller pra gerenciar a descrição das despesas
+  final TextEditingController _valorController = TextEditingController(); //um controller pra gerenciar o valor das despesas
 
   DateTime? _dataSelecionada;
 
-  Future<void> _selecionarData(BuildContext context) async {
+  Future<void> _selecionarData(BuildContext context) async { //Eu pesquisei essa função pra poder colocar o date picker que eu queria pra inserir a data em uma despesa
     final DateTime? dataEscolhida = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _adicionarDespesa() {
+  void _adicionarDespesa() { //função pra receber uma despesa e adicionar ela na lista
     String descricao = _descricaoController.text;
     double? valor = double.tryParse(_valorController.text);
 
@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                TextField(
+                TextField( //textfield pra receber a descrição da despesa que vai ser adicionada
                   controller: _descricaoController,
                   decoration: InputDecoration(
                     labelText: 'Descrição',
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(color: textColor),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.01,),
-                TextField(
+                TextField( //textfield pra receber o valor da despesa que vai ser adicionada
                   controller: _valorController,
                   decoration: InputDecoration(
                     labelText: 'Valor',
@@ -164,13 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           : 'Data: ${DateFormat('dd/MM/yyyy').format(_dataSelecionada!)}',
                       style: TextStyle(color: textColor),
                     ),
-                    IconButton(
+                    IconButton( //esse botão é pra adicionar a data na despesa
                       icon: Icon(Icons.calendar_today, color: primaryColor),
                       onPressed: () => _selecionarData(context), 
                     ),
                   ],
                 ),
-                ElevatedButton(
+                ElevatedButton( //esse botão é pra chamar a função e alterar o state dos componentes do formulário e adiconar a despesa na lista
                   style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
                   onPressed: _adicionarDespesa,
                   child: Text('Adicionar Despesa', style: TextStyle(color: buttonTextColor)),
@@ -179,19 +179,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Divider(),
-          Expanded(
+          Expanded( //pesquisei esse ListView também e é bem simples de usar só colocar o tamanho da lista e os ListTile são a rendenização de cada elemento da lista
             child: ListView.builder(
               itemCount: despesasController.despesas.length,
               itemBuilder: (context, index) {
                 final despesa = despesasController.despesas[index];
                 return ListTile(
-
                   title: Text(despesa.descricao, style: TextStyle(color: textColor)),
                   subtitle: Text(DateFormat('dd/MM/yyyy').format(despesa.data), style: TextStyle(color: textColor)),
                   trailing: Text('R\$ ${despesa.valor.toStringAsFixed(2)}', style: TextStyle(color: textColor)),
                   onLongPress: () {
                     setState(() {
-                      despesasController.removerDespesa(index);
+                      despesasController.removerDespesa(index); //coloquei pra remover o item quando clicar e segurar, pra não ter que colocar um botão pra cada item da lista
                     });
                   },
                 );

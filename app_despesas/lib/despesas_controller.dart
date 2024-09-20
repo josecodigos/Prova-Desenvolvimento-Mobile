@@ -1,19 +1,19 @@
 import 'despesa.dart';
 
-class DespesasController {
+class DespesasController { //Criação da lista de despesas
   List<Despesa> _despesas = [];
 
   List<Despesa> get despesas => _despesas;
 
-  void adicionarDespesa(Despesa despesa) {
+  void adicionarDespesa(Despesa despesa) { //Método para adicionar uma despesa na lista
     _despesas.add(despesa);
   }
 
-  void removerDespesa(int index) {
+  void removerDespesa(int index) { //Método para remover uma despesa da lista
     _despesas.removeAt(index);
   }
 
-  double get totalGastosDiarios {
+  double get totalGastosDiarios { //Função para calcular os gastos diários
     DateTime agora = DateTime.now();
     return _despesas
         .where((despesa) =>
@@ -23,7 +23,7 @@ class DespesasController {
         .fold(0, (sum, item) => sum + item.valor);
   }
 
-  double get totalGastosMensais {
+  double get totalGastosMensais { //Função para calcular os gastos mensais
     DateTime agora = DateTime.now();
     return _despesas
         .where((despesa) =>
@@ -32,7 +32,7 @@ class DespesasController {
         .fold(0, (sum, item) => sum + item.valor);
   }
 
-  double get totalGastosAnuais {
+  double get totalGastosAnuais { //Função para calcular os gastos anuais
     DateTime agora = DateTime.now();
     return _despesas
         .where((despesa) => despesa.data.year == agora.year)

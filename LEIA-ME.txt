@@ -1,0 +1,1 @@
+Oi prof, então, eu pesquisei várias funções pra tentar deixar mais ajeitadinho o código, mas fiz as coisas do jeito que entendi pra estruturar o app. Se você acha que precisa de mais alguma explicação sobre o código, além dos comentários, pode me mandar um email ou comentário no class que eu tento responder e explicar.
