@@ -78,9 +78,42 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
     }
   }
 
+  Future<void> _mostrarErro(String mensagem) async { //Função que mostra um erro em um popup, tentei deixar ele mais em aberto pra se precisar usar em outro lugar
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Erro', style: TextStyle(color: textColor)),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(mensagem, style: TextStyle(color: textColor)),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK', style: TextStyle(color: primaryColor)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   void _adicionarDespesa() { //função pra receber uma despesa e adicionar ela na lista
     String descricao = _descricaoController.text;
     double? valor = double.tryParse(_valorController.text);
+
+    if (_dataSelecionada == null){ //aqui ele verifica se a data foi selecionada e mostra um erro se não for
+      _mostrarErro("Por favor selecione uma data para inserir uma despesa!");
+      return;
+    }
 
     if (descricao.isNotEmpty && valor != null && _dataSelecionada != null) {
       setState(() {
