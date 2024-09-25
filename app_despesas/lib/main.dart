@@ -97,10 +97,10 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
     }
   }
 
-  Future<void> _confirmarRemocao(int index) async {
+  Future<void> _confirmarRemocao(int index) async { //Função pra confirmar a remoção, busquei na internet um componente de popup pra ficar mais legal
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // O usuário precisa confirmar ou cancelar
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirmação de Remoção', style: TextStyle(color: textColor)),
@@ -115,16 +115,16 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
             TextButton(
               child: Text('Cancelar', style: TextStyle(color: primaryColor)),
               onPressed: () {
-                Navigator.of(context).pop(); // Fecha o diálogo sem remover
+                Navigator.of(context).pop(); 
               },
             ),
             TextButton(
               child: Text('Remover', style: TextStyle(color: primaryColor)),
               onPressed: () {
                 setState(() {
-                  despesasController.removerDespesa(index); // Remove a despesa
+                  despesasController.removerDespesa(index);
                 });
-                Navigator.of(context).pop(); // Fecha o diálogo após remover
+                Navigator.of(context).pop();
               },
             ),
           ],
