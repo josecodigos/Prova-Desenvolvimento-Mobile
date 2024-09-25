@@ -97,6 +97,42 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
     }
   }
 
+  Future<void> _confirmarRemocao(int index) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // O usuário precisa confirmar ou cancelar
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmação de Remoção', style: TextStyle(color: textColor)),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Tem certeza de que deseja remover esta despesa?', style: TextStyle(color: textColor)),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar', style: TextStyle(color: primaryColor)),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo sem remover
+              },
+            ),
+            TextButton(
+              child: Text('Remover', style: TextStyle(color: primaryColor)),
+              onPressed: () {
+                setState(() {
+                  despesasController.removerDespesa(index); // Remove a despesa
+                });
+                Navigator.of(context).pop(); // Fecha o diálogo após remover
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
                   trailing: Text('R\$ ${despesa.valor.toStringAsFixed(2)}', style: TextStyle(color: textColor)),
                   onLongPress: () {
                     setState(() {
-                      despesasController.removerDespesa(index); //coloquei pra remover o item quando clicar e segurar, pra não ter que colocar um botão pra cada item da lista
+                      _confirmarRemocao(index);
+                      //coloquei pra remover o item quando clicar e segurar, pra não ter que colocar um botão pra cada item da lista
                     });
                   },
                 );
