@@ -15,6 +15,8 @@ Color buttonTextColor = Colors.white;
 Color calendarTextColor = Colors.blue;
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,6 +35,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -210,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
                   decoration: InputDecoration(
                     labelText: 'Descrição',
                     labelStyle: TextStyle(color: primaryColor),
-                    border: OutlineInputBorder()
+                    border: const OutlineInputBorder()
                   ),
                   style: TextStyle(color: textColor),
                 ),
@@ -220,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
                   decoration: InputDecoration(
                     labelText: 'Valor',
                     labelStyle: TextStyle(color: primaryColor),
-                    border: OutlineInputBorder()
+                    border: const OutlineInputBorder()
                   ),
                   keyboardType: TextInputType.number,
                   style: TextStyle(color: textColor),
@@ -247,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> { //Widget para HomeScreen stat
               ],
             ),
           ),
-          Divider(),
+          const Divider(),
           Expanded( //pesquisei esse ListView também e é bem simples de usar só colocar o tamanho da lista e os ListTile são a rendenização de cada elemento da lista
             child: ListView.builder(
               itemCount: despesasController.despesas.length,

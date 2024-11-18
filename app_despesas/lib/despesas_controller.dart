@@ -1,7 +1,7 @@
 import 'despesa.dart';
 
 class DespesasController { //Criação da lista de despesas
-  List<Despesa> _despesas = [];
+  final List<Despesa> _despesas = [];
 
   List<Despesa> get despesas => _despesas;
 
