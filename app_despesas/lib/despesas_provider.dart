@@ -1,6 +1,6 @@
-import 'despesa.dart';
+import '/despesa.dart';
 
-class DespesasController { //Criação da lista de despesas
+class DespesasProvider { //Criação da lista de despesas
   final List<Despesa> _despesas = [];
 
   List<Despesa> get despesas => _despesas;

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'db_helper.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-// Colors for the app
 Color primaryColor = Colors.purple.shade100;
 Color secondaryColor = Colors.purple;
 Color backgroundColor = Colors.grey.shade100;
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Agenda de Despesas',
+      title: 'Controle de Despesas',
       theme: ThemeData(
         primaryColor: primaryColor,
         scaffoldBackgroundColor: backgroundColor,
@@ -31,23 +33,43 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Agenda de despesas',
+          'Controle de Despesas',
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: primaryColor,
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search, color: Colors.black),
+          FutureBuilder<Map<String, dynamic>>(
+            future: obterCotacaoDolar(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(color: secondaryColor),
+                );
+              }
+              final cotacao = snapshot.data!;
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Dólar: Compra R\$${cotacao['bid']} | Venda R\$${cotacao['ask']}',
+                  style: TextStyle(color: Colors.black),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -56,84 +78,111 @@ class HomeScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Resumo de despesas',
+              'Resumo de Transações',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
             ),
           ),
           Expanded(
-            child: ListView(
-              children: [
-                _buildSummaryCard('Gastos diários', 'Subhead', Icons.circle),
-                _buildSummaryCard('Gastos mensais', 'Subhead', Icons.calendar_month),
-                _buildSummaryCard('Gastos anuais', 'Subhead', Icons.calendar_today),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Resumos personalizados',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: DatabaseHelper().listarTransacoes(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                final transacoes = snapshot.data!;
+                if (transacoes.isEmpty) {
+                  return Center(child: Text('Nenhuma transação registrada.'));
+                }
+                return ListView.builder(
+                  itemCount: transacoes.length,
+                  itemBuilder: (context, index) {
+                    final transacao = transacoes[index];
+                    return ListTile(
+                      title: Text(transacao['descricao']),
+                      subtitle: Text(
+                          '${transacao['tipo']} - R\$ ${transacao['valor'].toStringAsFixed(2)}'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          await DatabaseHelper().excluirTransacao(transacao['id']);
+                          setState(() {});
+                        },
                       ),
-                      TextButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.edit, color: Colors.purple),
-                        label: const Text('Inserir', style: TextStyle(color: Colors.purple)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: buttonTextColor,
-        selectedItemColor: secondaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Resumo de despesas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
-            label: 'Listagem de despesas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configurações',
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _adicionarTransacao(context);
+        },
         backgroundColor: secondaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildSummaryCard(String title, String subtitle, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Card(
-        elevation: 2,
-        color: primaryColor,
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: secondaryColor,
-            child: const Text('A', style: TextStyle(color: Colors.white)),
-          ),
-          title: Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
-          ),
-          subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade700)),
-          trailing: Icon(icon, color: Colors.grey),
+  void _adicionarTransacao(BuildContext context) {
+    String descricao = '';
+    double valor = 0.0;
+    String tipo = 'Despesa'; // Padrão
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Adicionar Transação'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: InputDecoration(labelText: 'Descrição'),
+              onChanged: (value) => descricao = value,
+            ),
+            TextField(
+              decoration: InputDecoration(labelText: 'Valor'),
+              keyboardType: TextInputType.number,
+              onChanged: (value) => valor = double.tryParse(value) ?? 0.0,
+            ),
+            DropdownButton<String>(
+              value: tipo,
+              items: ['Receita', 'Despesa']
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .toList(),
+              onChanged: (value) => setState(() {
+                tipo = value!;
+              }),
+            ),
+          ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await DatabaseHelper()
+                  .inserirTransacao(descricao, valor, DateTime.now(), tipo);
+              Navigator.pop(context);
+              setState(() {});
+            },
+            child: Text('Salvar'),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> obterCotacaoDolar() async {
+    final response = await http.get(Uri.parse('https://economia.awesomeapi.com.br/last/USD-BRL'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body)['USDBRL'];
+    } else {
+      throw Exception('Erro ao obter a cotação do dólar');
+    }
   }
 }
