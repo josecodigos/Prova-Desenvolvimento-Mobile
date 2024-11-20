@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../addDespesaForm.dart';
 import '/despesas_provider.dart';
 import 'main_screen.dart';
+import 'package:app_despesas/exchange.dart';
 
 class ListagemDespesas extends StatefulWidget {
   const ListagemDespesas({Key? key}) : super(key: key);
@@ -37,8 +38,8 @@ class _ListagemDespesasState extends State<ListagemDespesas> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () {},
             icon: const Icon(Icons.attach_money, color: Colors.black),
+            onPressed: () => Exchange.showExchangeRate(context),
           ),
         ],
       ),

@@ -9,6 +9,19 @@ class DespesasProvider with ChangeNotifier{
   final DatabaseHelper dbHelper = DatabaseHelper();
   List<Despesa> despesas = []; 
   double? customPeriodSum;
+  bool isLoading = true;
+
+  Future<void> loadDb() async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      final db = await dbHelper.instance.database;
+    } catch (e) {
+      debugPrint('Erro carregando database: $e');
+    }
+    isLoading = false;
+    notifyListeners();
+  }
 
 
   Future<void> carregarDespesas() async {

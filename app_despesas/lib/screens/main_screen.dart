@@ -1,3 +1,5 @@
+import 'package:app_despesas/screens/listagem_receitas.dart';
+import 'package:app_despesas/screens/resReceita_screen.dart';
 import 'package:flutter/material.dart';
 import 'resumo_screen.dart';
 import 'listagem_despesas.dart';
@@ -16,25 +18,32 @@ Color textColor = Colors.black;
 Color buttonTextColor = Colors.white;
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0; 
+  int _currentIndex = 0;
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const ListagemDespesas(), 
-    const Center(child: Text('Configurações')),
+    const ListagemDespesas(),
+    const ListagemReceitas(),
+    const ResumoReceitaScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: SafeArea(
+        child: _screens[_currentIndex.clamp(0, _screens.length - 1)],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index; 
+            _currentIndex = index;
           });
         },
+        selectedItemColor: secondaryColor,
+        unselectedItemColor: primaryColor,
+        backgroundColor: backgroundColor,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -45,8 +54,12 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Listagem de despesas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configurações',
+            icon: Icon(Icons.attach_money),
+            label: 'Receitas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dataset),
+            label: 'Resumo de receitas',
           ),
         ],
       ),

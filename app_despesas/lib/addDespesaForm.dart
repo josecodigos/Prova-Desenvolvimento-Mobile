@@ -73,7 +73,7 @@ class _AddDespesaFormState extends State<AddDespesaForm> {
             content: Text('Despesa adicionada com sucesso!'),
           ),
         );
-        Navigator.of(context).pop(); // Close the modal
+        Navigator.of(context).pop(); 
       }
     }
   }

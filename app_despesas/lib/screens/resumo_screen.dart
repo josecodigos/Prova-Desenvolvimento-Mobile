@@ -1,7 +1,7 @@
 import 'package:app_despesas/despesas_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import '../exchange.dart';
 import 'main_screen.dart';
 import 'package:app_despesas/addDespesaForm.dart';
 
@@ -17,14 +17,13 @@ class HomeScreen extends StatelessWidget {
       style: TextStyle(color: Colors.black),
     ),
     backgroundColor: primaryColor,
-    elevation: 0,
-    actions: [
-      IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.attach_money, color: Colors.black),
-      ),
-    ],
-  ),
+    elevation: 0,actions: [
+          IconButton(
+            icon: const Icon(Icons.attach_money, color: Colors.black),
+            onPressed: () => Exchange.showExchangeRate(context),
+          ),
+        ],
+    ),
   body: Consumer<DespesasProvider>(
     builder: (context, despesasProvider, child) {
       return Column(

@@ -9,6 +9,8 @@ class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
+  DatabaseHelper get instance => _instance;
+
   factory DatabaseHelper() {
     return _instance;
   }
