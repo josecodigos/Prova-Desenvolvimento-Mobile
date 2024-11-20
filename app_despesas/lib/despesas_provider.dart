@@ -1,41 +1,99 @@
-import '/despesa.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class DespesasProvider { //Criação da lista de despesas
-  final List<Despesa> _despesas = [];
+import 'db_helper.dart';
+import 'despesa.dart';
 
-  List<Despesa> get despesas => _despesas;
+class DespesasProvider with ChangeNotifier{
+  final DatabaseHelper dbHelper = DatabaseHelper();
+  List<Despesa> despesas = []; 
+  double? customPeriodSum;
 
-  void adicionarDespesa(Despesa despesa) { //Método para adicionar uma despesa na lista
-    _despesas.add(despesa);
+
+  Future<void> carregarDespesas() async {
+    despesas = await dbHelper.getDespesa();
+    notifyListeners();
   }
 
-  void removerDespesa(int index) { //Método para remover uma despesa da lista
-    _despesas.removeAt(index);
+  Future<void> adicionarDespesa(Despesa despesa) async {
+    await dbHelper.insertDespesa(despesa);
+    despesas.add(despesa);
+    await carregarDespesas(); 
   }
 
-  double get totalGastosDiarios { //Função para calcular os gastos diários
-    DateTime agora = DateTime.now();
-    return _despesas
-        .where((despesa) =>
-            despesa.data.day == agora.day &&
-            despesa.data.month == agora.month &&
-            despesa.data.year == agora.year)
-        .fold(0, (sum, item) => sum + item.valor);
+  Future<void> removerDespesa(int id) async {
+    await dbHelper.excluirDespesa(id);
+    despesas.removeWhere((despesa) => despesa.id == id);
+    await carregarDespesas(); 
   }
 
-  double get totalGastosMensais { //Função para calcular os gastos mensais
-    DateTime agora = DateTime.now();
-    return _despesas
-        .where((despesa) =>
-            despesa.data.month == agora.month &&
-            despesa.data.year == agora.year)
-        .fold(0, (sum, item) => sum + item.valor);
+  Future<void> editarDespesa(Despesa despesa) async {
+    await dbHelper.editarDespesa(despesa);
+    int index = despesas.indexWhere((d) => d.id == despesa.id);
+    if (index != -1) {
+      despesas[index] = despesa;
+    }
+    await carregarDespesas(); 
   }
 
-  double get totalGastosAnuais { //Função para calcular os gastos anuais
-    DateTime agora = DateTime.now();
-    return _despesas
-        .where((despesa) => despesa.data.year == agora.year)
-        .fold(0, (sum, item) => sum + item.valor);
-  }
+String get totalGastosDiarios {
+  DateTime agora = DateTime.now();
+  double total = despesas
+      .where((despesa) =>
+          despesa.data.day == agora.day &&
+          despesa.data.month == agora.month &&
+          despesa.data.year == agora.year)
+      .fold(0, (sum, item) => sum + item.valor);
+
+  return 'R\$ ${total.toStringAsFixed(2)}';
 }
+
+
+String get totalGastosMensais {
+  DateTime agora = DateTime.now();
+  double total = despesas
+      .where((despesa) =>
+          despesa.data.month == agora.month &&
+          despesa.data.year == agora.year)
+      .fold(0, (sum, item) => sum + item.valor);
+
+  return 'R\$ ${total.toStringAsFixed(2)}';
+}
+
+String get totalGastosAnuais {
+  DateTime agora = DateTime.now();
+  double total = despesas
+      .where((despesa) => despesa.data.year == agora.year)
+      .fold(0, (sum, item) => sum + item.valor);
+
+  return 'R\$ ${total.toStringAsFixed(2)}';
+}
+
+Future<double?> calculateCustomPeriodSum(BuildContext context) async {
+  final DateTime? startDate = await showDatePicker(
+  context: context, 
+  initialDate: DateTime.now(),
+  firstDate: DateTime(2000), 
+  lastDate: DateTime.now());
+
+  final DateTime? endDate = await showDatePicker(
+  context: context, 
+  initialDate: DateTime.now(),
+  firstDate: startDate ?? DateTime(2000), 
+  lastDate: DateTime.now());
+
+  if(startDate != null && endDate != null){
+    final sum = despesas
+      .where((despesa) =>
+              despesa.data.isAfter(startDate) &&
+              despesa.data.isBefore(endDate))
+      .fold(0.00, (prev, element) => prev + element.valor);
+    customPeriodSum = sum;
+    notifyListeners();
+    return sum;
+  }
+  return null;
+}
+}
+

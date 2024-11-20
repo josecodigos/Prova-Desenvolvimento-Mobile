@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -20,9 +21,11 @@ class DatabaseHelper {
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'agendaFinanceira.db');
+Future<Database> _initDatabase() async {
+  
+  final directory = await getApplicationDocumentsDirectory();
+  final path = join(directory.path, 'agendaFinanceira.db');
+  print('Database path: $path');
 
     return openDatabase(
       path,
@@ -34,21 +37,15 @@ class DatabaseHelper {
             titulo TEXT,
             descricao TEXT,
             valor DOUBLE,
-            data TEXT,
-          );
-          CREATE TABLE receita (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT,
-            valor DOUBLE,
-          );
+            data TEXT
+          )
         ''');
       },
     );
   }
-
-  Future<int> insertDespesa(String titulo, String descricao, double valor, DateTime data) async {
+    Future<void> insertDespesa(Despesa despesa) async {
     final db = await database;
-    return await db.insert('despesa', despesa.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('despesa', despesa.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Despesa>>getDespesa() async{
@@ -62,6 +59,20 @@ class DatabaseHelper {
 
   Future<int> excluirDespesa(int id) async {
     final db = await database;
-    return await db.delete('despesa', where: 'id = ?', whereArgs: [id]);
+    return await db.delete(
+      'despesa', 
+      where: 'id = ?', 
+      whereArgs: [id]);
   }
+
+  Future<int> editarDespesa(Despesa despesa) async {
+  final db = await database;
+  return await db.update(
+    'despesa',
+    despesa.toMap(),
+    where: 'id = ?',
+    whereArgs: [despesa.id],
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
 }
